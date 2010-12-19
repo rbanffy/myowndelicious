@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding:utf-8 -*-
 
 # This file is part of "My Own Delicious".
 #
@@ -35,6 +36,16 @@ class MainHandler(webapp.RequestHandler):
         template_values = {}
         path = os.path.join(os.path.dirname(__file__), 'templates/main.html')
         self.response.out.write(template.render(path, template_values))
+
+
+class ImportHandler(webapp.RequestHandler):
+    def get(self):
+        # this requires authentication
+        pass
+
+    def post(self):
+        # this requires authentication
+        pass
 
 
 def main():
