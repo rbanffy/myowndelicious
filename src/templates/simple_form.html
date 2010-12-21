@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
 {% block contents %}
-<p>"Please login" or, if logged in, your n most recent bookmarks, along with your tags.</p>
+<form method="POST" id="" action="">
+  <ul>
+  {{ form.as_ul }}
+  </ul>
+  <input type="submit" name="import this" value="import this" />
+</form>
 {% endblock %}
 

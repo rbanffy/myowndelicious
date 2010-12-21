@@ -16,5 +16,11 @@
 # with "My Own Delicious".  If not, see <http://www.gnu.org/licenses/>.
 
 
+from models import *
+
 def import_posts(user, xml_string):
+    """
+    This will import posts, add "normal" tags and, perhaps, if we decide so, treat "for:" tags independently
+    """
     pass
+

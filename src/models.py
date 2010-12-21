@@ -33,10 +33,13 @@ class Post(db.Model):
     tags = db.ListProperty(db.CategoryProperty())
     extended = db.StringProperty()
     meta = db.StringProperty()
+    restricted = db.BooleanProperty(default = False) # The special-meaning "restricted" tag lives here
+
 
 class Link(db.Model):
     href = db.LinkProperty()
     # Maybe hash_property and meta belong here. We'll see with enough data
+
 
 class PostTag(db.Model):
     """
@@ -46,6 +49,7 @@ class PostTag(db.Model):
     """
     post = db.ReferenceProperty(Post)
     
+
 class Tag(db.Model):
     tagname = db.CategoryProperty()
     

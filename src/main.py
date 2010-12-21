@@ -31,6 +31,10 @@ import os
 import random
 import logging
 
+from forms import *
+import delicious_tools 
+import myowndelicious_tools
+
 class MainHandler(webapp.RequestHandler):
     def get(self):
         template_values = {}
@@ -38,18 +42,48 @@ class MainHandler(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
-class ImportHandler(webapp.RequestHandler):
+class PasteImportHandler(webapp.RequestHandler):
+    """
+    Deals with pasted XML
+
+    We want it for testing and we may remove it in the future, or turn it into
+    something better/that makes sense
+    """
+
     def get(self):
-        # this requires authentication
-        pass
+        user = users.get_current_user()
+        
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+        else:
+            f = BookmarksXMLImportForm()
+            template_values = {'form': f}
+            path = os.path.join(os.path.dirname(__file__), 'templates/simple_form.html')
+            self.response.out.write(template.render(path, template_values))
 
     def post(self):
-        # this requires authentication
-        pass
+        user = users.get_current_user()
+        
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+        else:
+            f = BookmarksXMLImportForm(self.request)
+            if f.is_valid():
+                xml_string = f.clean_data['xml_field']
+                posts = delicious_tools.posts(xml_string)
+                myowndelicious_tools.import_posts(user, xml_string)
+                message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>\n' for post in posts ]) + '</ol>'
+            else:
+                message = f.errors
+
+            template_values = {'message': message}
+            path = os.path.join(os.path.dirname(__file__), 'templates/simple_message.html')
+            self.response.out.write(template.render(path, template_values))
 
 
 def main():
-    application = webapp.WSGIApplication([('/', MainHandler)],
+    application = webapp.WSGIApplication([('/', MainHandler),
+                                          ('/import_paste.html', PasteImportHandler),],
                                          debug=True)
     util.run_wsgi_app(application)
 
