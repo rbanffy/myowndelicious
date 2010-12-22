@@ -27,5 +27,11 @@ def posts(xml_string):
     posts = []
     for node in minidom.parseString(xml_string).getElementsByTagName('post'):
         posts.append({'link': node.getAttribute('href'),
-                      'description': node.getAttribute('description')})
+                      'description': node.getAttribute('description'),
+                      'hash': node.getAttribute('hash'), # We can check - this is the MD5 of the URL
+                      'time': datetime.datetime.strptime(node.getAttribute('time'), '%Y-%m-%dT%H:%M:%SZ'),
+                      'extended': node.getAttribute('extended'),
+                      'tag': node.getAttribute('tag'),
+                      'meta': node.getAttribute('meta')
+                      })
     return posts

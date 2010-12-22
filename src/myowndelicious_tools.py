@@ -18,7 +18,7 @@
 
 from models import *
 
-def import_posts(user, xml_string):
+def import_posts(user, posts):
     """
     This will import posts, add "normal" tags and, perhaps, if we decide so, treat "for:" tags independently
     """
