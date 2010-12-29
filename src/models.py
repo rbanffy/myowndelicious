@@ -48,7 +48,7 @@ class Post(db.Model):
     hash_property = db.StringProperty() # shouldn't call it "hash" or nasty things may happen
     # So far, hash_property seems to be a straighforward MD5 of the URL, but we'll confirm that in due time
     time = db.DateTimeProperty(auto_now_add = True)
-    tags = db.ListProperty(db.Category)
+    tags = db.ListProperty(str)
     extended = db.StringProperty()
     meta = db.StringProperty()
     restricted = db.BooleanProperty(default = False) # The special-meaning "restricted" tag lives here

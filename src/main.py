@@ -73,7 +73,7 @@ class PasteImportHandler(webapp.RequestHandler):
                 logging.debug('importing a request')
                 xml_string = f.clean_data['xml_field']
                 posts = delicious_tools.posts(xml_string)
-                myowndelicious_tools.import_posts(user, xml_string)
+                myowndelicious_tools.import_posts(user, posts)
                 message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>\n' for post in posts ]) + '</ol>'
             else:
                 message = f.errors
