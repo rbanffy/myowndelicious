@@ -24,21 +24,35 @@ class UserProfile(db.Model):
     user = db.UserProperty()
     delicious_login = db.StringProperty()
 
+
+class Link(db.Model):
+    """
+    Represents a URL that was bookmarked
+
+    Maybe we look it up via the hash_property attribute (specially if we decide to turn it into a Long)
+    """
+    #href = db.LinkProperty()
+    # Maybe hash_property and meta belong here. We'll see with enough (more than one post per URL) data
+    @property
+    def href(self):
+        return self.key().name()
+
+
 class Post(db.Model):
+    """
+    Represents a bookmark
+    """
     posted_by = db.UserProperty()
     link = db.ReferenceProperty(Link)
     description = db.TextProperty()
-    hash_property = db.StringProperty() # shouldn't call it hash or nasty things may happen
+    hash_property = db.StringProperty() # shouldn't call it "hash" or nasty things may happen
+    # So far, hash_property seems to be a straighforward MD5 of the URL, but we'll confirm that in due time
     time = db.DateTimeProperty(auto_now_add = True)
-    tags = db.ListProperty(db.CategoryProperty())
+    tags = db.ListProperty(db.Category)
     extended = db.StringProperty()
     meta = db.StringProperty()
     restricted = db.BooleanProperty(default = False) # The special-meaning "restricted" tag lives here
 
-
-class Link(db.Model):
-    href = db.LinkProperty()
-    # Maybe hash_property and meta belong here. We'll see with enough data
 
 
 class PostTag(db.Model):
@@ -51,5 +65,8 @@ class PostTag(db.Model):
     
 
 class Tag(db.Model):
+    """ 
+    A tag. A Post can have as many tags as wanted
+    """
     tagname = db.CategoryProperty()
     

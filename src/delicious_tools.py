@@ -15,8 +15,11 @@
 # You should have received a copy of the Affero GNU General Public License along 
 # with "My Own Delicious".  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+import logging
 import sys
 reload(sys); sys.setdefaultencoding('utf-8')
+
 
 from xml.dom import minidom # import parse, parseString
 
@@ -34,4 +37,5 @@ def posts(xml_string):
                       'tag': node.getAttribute('tag'),
                       'meta': node.getAttribute('meta')
                       })
+        logging.debug('reading post ' + node.getAttribute('href'))
     return posts

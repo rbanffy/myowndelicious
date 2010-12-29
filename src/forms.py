@@ -26,5 +26,5 @@ class BookmarksXMLImportForm(forms.Form):
     xml_field = forms.CharField(label = 'Exported XML',
                                 help_text = 'paste the XML you got from Delicious here',
                                 required = True,
-                                widget = forms.widgets.Textarea(attrs = {'rows':24, 'cols':40}))
+                                widget = forms.widgets.Textarea(attrs = {'rows':24, 'cols':80}))
 

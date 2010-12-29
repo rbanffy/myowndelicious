@@ -15,12 +15,47 @@
 # You should have received a copy of the Affero GNU General Public License along 
 # with "My Own Delicious".  If not, see <http://www.gnu.org/licenses/>.
 
-
+import logging
 from models import *
+
+
+def cleaned_tags(taglist):
+    return [t.lower() for t in taglist if t != 'restricted']
+
 
 def import_posts(user, posts):
     """
-    This will import posts, add "normal" tags and, perhaps, if we decide so, treat "for:" tags independently
+    This will import posts (provided as a list of dictionaries), add "normal" tags and, perhaps, if we decide so, treat "for:" tags independently
     """
-    pass
+    for post in posts:
+        #logging.debug(post)
+        #logging.debug('storing post ' + post['link'] + ' from ' + user)
+        # Get the Link that corresponds to this URL
+        link = Link.get_or_insert(post['link'])
+        # if there already exists a post, get it, if not, create one
+        p = Post.all().filter('link =', l).filter('posted_by =', user).get()
+        if p:
+            # Already a post for this link and this user
+            # TODO: we'll have to remove all PostTags that have no corresponding tags in this post - we are reimporting a post
+            pass
+        else:
+            # We'll have to make a post
+            p = Post(posted_by = user,
+                     link = link,
+                     description = post['description'],
+                     hash_property = post['hash_property'],
+                     tags = cleaned_tags(post['tags'].split(' ')),
+                     extended = post['extended'],
+                     meta = post['meta'],
+                     restricted = 'restricted' in post['tags'].split(' '))
+            p.put()
+            
+        for tag in cleaned_tags(post['tags']):
+            logging.debug('adding tag ' + tag + ' for post ' + p.link.href)
+            pt = PostTag.create_or_insert(tag, parent = p)
+            t = Tag.create_or_insert(tag)
+
+        # Find each tag in the tags property and find/add a PostTag for each
+        # Add a LinkTag for each tag that's neither a for: tag nor the "restricted"
+
 

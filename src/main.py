@@ -18,7 +18,8 @@
 
 from google.appengine.api import oauth
 from google.appengine.api import urlfetch
-from google.appengine.api import users, xmpp
+from google.appengine.api import users 
+from google.appengine.api import xmpp
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import util
@@ -69,6 +70,7 @@ class PasteImportHandler(webapp.RequestHandler):
         else:
             f = BookmarksXMLImportForm(self.request)
             if f.is_valid():
+                logging.debug('importing a request')
                 xml_string = f.clean_data['xml_field']
                 posts = delicious_tools.posts(xml_string)
                 myowndelicious_tools.import_posts(user, xml_string)
