@@ -43,10 +43,8 @@ def import_a_post(user, post):
                  restricted = 'restricted' in post['tag'].split(' '))
         p.put()
             
-    for tag in cleaned_tags(post['tag']):
-        logging.debug('adding tag ' + tag + ' for post ' + p.link.href)
-        pt = PostTag.get_or_insert(tag, parent = p)
-        t = Tag.get_or_insert(tag)
+    for tagname in cleaned_tags(post['tag']):
+        p.add_tag(tagname)
         
     # Find each tag in the tags property and find/add a PostTag for each
     # Add a LinkTag for each tag that's neither a for: tag nor the "restricted"

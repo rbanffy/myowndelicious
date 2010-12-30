@@ -53,6 +53,12 @@ class Post(db.Model):
     meta = db.StringProperty()
     restricted = db.BooleanProperty(default = False) # The special-meaning "restricted" tag lives here
 
+    def add_tag(self, tagname):
+        tag = db.Category(tagname)
+        logging.debug('adding tag ' + tag + ' for post ' + p.link.href)
+        t = Tag.get_or_insert(key = tag)
+        pt = PostTag.get_or_insert(post = self, parent = tag)
+        return pt
 
 
 class PostTag(db.Model):
