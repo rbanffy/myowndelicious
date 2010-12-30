@@ -16,9 +16,12 @@
 # with "My Own Delicious".  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+
+# We are fine with importing something called models but importing the inhards of GAE would create too strong a coupling
 from models import *
 
-def cleaned_tags(taglist):
+
+def ordinary_tags(taglist):
     return [t.lower() for t in taglist if t != 'restricted']
 
 def import_a_post(user, post):
@@ -37,13 +40,13 @@ def import_a_post(user, post):
                  link = link,
                  description = post['description'],
                  hash_property = post['hash'],
-                 tags = cleaned_tags(post['tag'].split(' ')),
+                 tags = ordinary_tags(post['tag'].split(' ')),
                  extended = post['extended'],
                  meta = post['meta'],
                  restricted = 'restricted' in post['tag'].split(' '))
         p.put()
             
-    for tagname in cleaned_tags(post['tag']):
+    for tagname in ordinary_tags(post['tag']):
         p.add_tag(tagname)
         
     # Find each tag in the tags property and find/add a PostTag for each
@@ -53,7 +56,7 @@ def import_a_post(user, post):
 
 def import_posts(user, posts):
     """
-    This will import posts (provided as a list of dictionaries), add "normal" tags and, perhaps, if we decide so, treat "for:" tags independently
+    This will import posts (provided as a list of dictionaries), add "ordinary" tags and, perhaps, if we decide so, treat "for:" tags independently
     """
     for post in posts:
         import_a_post(user, post)
