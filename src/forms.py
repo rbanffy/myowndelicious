@@ -19,6 +19,8 @@
 # We are using an ancient version of Django here. Don't expect anything very fancy
 from django import newforms as forms
 
+from xml.dom import minidom # import parse, parseString
+
 class BookmarksXMLImportForm(forms.Form):
     """
     Very simple form, mostly here to easily validate handmade or pasted XML

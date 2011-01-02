@@ -24,8 +24,9 @@ from models import *
 def ordinary_tags(taglist):
     return [t.lower() for t in taglist if t != 'restricted']
 
+
 def import_a_post(user, post):
-    #logging.debug('storing post ' + post['link'] + ' from ' + user)
+    logging.debug('storing post ' + post['link'] + ' from ' + user.nickname() + ' with tags "' + post['tag'] + '"')
     # Get the Link that corresponds to this URL
     link = Link.get_or_insert(post['link'])
     # if there already exists a post, get it, if not, create one
@@ -46,8 +47,13 @@ def import_a_post(user, post):
                  restricted = 'restricted' in post['tag'].split(' '))
         p.put()
             
-    for tagname in ordinary_tags(post['tag']):
-        p.add_tag(tagname)
+    if post['tag']:
+        for tagname in ordinary_tags(post['tag'].split(' ')):
+            p.add_tag(tagname)
+    else:
+        # We should remove all PostTag objects associated with this post
+        # FIXME: Actually do it
+        pass
         
     # Find each tag in the tags property and find/add a PostTag for each
     # Add a LinkTag for each tag that's neither a for: tag nor the "restricted"

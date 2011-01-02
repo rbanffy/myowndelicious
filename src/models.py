@@ -19,6 +19,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 
 import datetime
+import logging
 
 class UserProfile(db.Model):
     user = db.UserProperty()
@@ -55,24 +56,33 @@ class Post(db.Model):
 
     def add_tag(self, tagname):
         tag = db.Category(tagname)
-        logging.debug('adding tag ' + tag + ' for post ' + p.link.href)
-        t = Tag.get_or_insert(key = tag)
-        pt = PostTag.get_or_insert(post = self, parent = tag)
+        logging.debug('adding tag ' + tag + ' for post ' + self.link.href)
+        t = Tag.get_or_insert(tagname)
+        pt = PostTag.all().filter('post =', self).filter('parent =', t).get()
+        if pt:
+            logging.debug('Post ' + self.key().name() + ' already had tag ' + tagname)
+        else:
+            pt = PostTag(post = self, tag = t, parent = t)
+            pt.put()
         return pt
+
+
+class Tag(db.Model):
+    """ 
+    A tag. A Post can have as many tags as wanted
+
+    Wondering if we can have no property beyond the key name (that's the tag name)
+    """
+    tagname = db.CategoryProperty()
 
 
 class PostTag(db.Model):
     """
     The many-to-many relationship between tags and posts makes easy to find posts
 
-    A tag is always the parent - keeps the tag relationships
+    A tag is always the parent - keeps the tag relationships close in the datastore
     """
     post = db.ReferenceProperty(Post)
+    tag = db.ReferenceProperty(Tag)
     
 
-class Tag(db.Model):
-    """ 
-    A tag. A Post can have as many tags as wanted
-    """
-    tagname = db.CategoryProperty()
-    
