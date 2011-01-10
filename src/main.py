@@ -43,7 +43,7 @@ class MainHandler(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
-class AsynchronousImportHandler(webapp.RequestHandler):
+class PasteImportHandler(webapp.RequestHandler):
     """
     Deals with pasted XML
 
@@ -51,11 +51,93 @@ class AsynchronousImportHandler(webapp.RequestHandler):
     something better/that makes sense
     """
 
-    def post(self, user, xml_string):
-        logging.debug('Asynchronously importing a request')
+    def get(self):
+        user = users.get_current_user()
+        
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+        else:
+            f = BookmarksXMLImportForm()
+            template_values = {'form': f}
+            path = os.path.join(os.path.dirname(__file__), 'templates/simple_form.html')
+            self.response.out.write(template.render(path, template_values))
 
-        logging.debug('our xml has %d' % len(xml_string))
-        posts = delicious_tools.posts(xml_string)
-        myowndelicious_tools.import_posts(user, posts)
+    def post(self):
+        user = users.get_current_user()
+        
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+        else:
+            f = BookmarksXMLImportForm(self.request)
+            if f.is_valid():
+                logging.debug('importing a request')
+                xml_string = f.clean_data['xml_field']
+                posts = delicious_tools.posts(xml_string)
+                myowndelicious_tools.import_posts(user, posts)
+                message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>\n' for post in posts ]) + '</ol>'
+            else:
+                message = f.errors
+
+            template_values = {'message': message}
+            path = os.path.join(os.path.dirname(__file__), 'templates/simple_message.html')
+            self.response.out.write(template.render(path, template_values))
 
 
+class UploadImportHandler(webapp.RequestHandler):
+    """
+    Deals with uploaded XML
+    """
+
+    def get(self):
+        user = users.get_current_user()
+        
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+        else:
+            f = BookmarksXMLUploadImportForm()
+            template_values = {'form': f}
+            path = os.path.join(os.path.dirname(__file__), 'templates/simple_form.html')
+            self.response.out.write(template.render(path, template_values))
+
+
+    def post(self):
+        user = users.get_current_user()
+        
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+        else:
+            #f = BookmarksXMLUploadImportForm(self.request)
+            if True:
+
+                # import sys
+                # for attr in ('stdin', 'stdout', 'stderr'):
+                #     setattr(sys, attr, getattr(sys, '__%s__' % attr))
+                # import pdb
+                # pdb.set_trace()
+
+                logging.debug('importing a request')
+                xml_string = self.request.get('xml_data')
+                #posts = delicious_tools.posts(xml_string)
+                #myowndelicious_tools.import_posts(user, posts)
+                #message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>\n' for post in posts ]) + '</ol>'
+                message = 'request is %d bytes long' % len(xml_string)
+            else:
+                message = f.errors
+
+            template_values = {'message': message}
+            path = os.path.join(os.path.dirname(__file__), 'templates/simple_message.html')
+            self.response.out.write(template.render(path, template_values))
+
+
+
+
+def main():
+    application = webapp.WSGIApplication([('/', MainHandler),
+                                          ('/import_paste.html', PasteImportHandler),
+                                          ('/import_upload.html', UploadImportHandler),],
+                                         debug=True)
+    util.run_wsgi_app(application)
+
+
+if __name__ == '__main__':
+    main()

@@ -30,3 +30,12 @@ class BookmarksXMLImportForm(forms.Form):
                                 required = True,
                                 widget = forms.widgets.Textarea(attrs = {'rows':24, 'cols':80}))
 
+
+class BookmarksXMLUploadImportForm(forms.Form):
+    """
+    A form with a file control
+    """
+    xml_data = forms.CharField(label = 'Exported XML',
+                               help_text = 'select the XML file you got from Delicious',
+                               required = True,
+                               widget = forms.widgets.FileInput)
