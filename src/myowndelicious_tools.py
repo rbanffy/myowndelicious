@@ -22,6 +22,11 @@ from models import *
 
 
 def ordinary_tags(taglist):
+    """
+    Returns a list of tagnames that have no special meaning
+
+    Currently, the only one I have identified is the "restricted" tag.
+    """
     return [t.lower() for t in taglist if t != 'restricted']
 
 
@@ -33,10 +38,16 @@ def import_a_post(user, post):
     p = Post.all().filter('link =', link).filter('posted_by =', user).get()
     if p:
         # Already a post for this link and this user
-        # TODO: we'll have to remove all PostTags that have no corresponding tags in this post - we are reimporting a post
-        pass
+        # We have to remove all PostTags that have no corresponding tags in this post - we are reimporting a post
+
+        tags_to_delete = [ pt.tag.key().name() for pt in PostTag.all().filter('post =', p) 
+                           if pt.tag.key().name() not in p.tags ]
+
+        for tagname in tags_to_delete:
+            logging.debug('should get rid of PostTag for post %s and tag %s' % (pt.tag.key().name(), pt.post.link.href))
+ 
     else:
-        # We'll have to make a post
+        # We'll make a new post and add required Tag and PostTag objects
         p = Post(posted_by = user,
                  link = link,
                  description = post['description'],
@@ -50,14 +61,7 @@ def import_a_post(user, post):
     if post['tag']:
         for tagname in ordinary_tags(post['tag'].split(' ')):
             p.add_tag(tagname)
-    else:
-        # We should remove all PostTag objects associated with this post
-        # FIXME: Actually do it
-        pass
         
-    # Find each tag in the tags property and find/add a PostTag for each
-    # Add a LinkTag for each tag that's neither a for: tag nor the "restricted"
-
     return p
 
 def import_posts(user, posts):

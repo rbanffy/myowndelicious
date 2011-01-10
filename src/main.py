@@ -74,7 +74,7 @@ class PasteImportHandler(webapp.RequestHandler):
                 xml_string = f.clean_data['xml_field']
                 posts = delicious_tools.posts(xml_string)
                 myowndelicious_tools.import_posts(user, posts)
-                message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>\n' for post in posts ]) + '</ol>'
+                message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>' for post in posts ]) + '</ol>'
             else:
                 message = f.errors
 
@@ -117,10 +117,9 @@ class UploadImportHandler(webapp.RequestHandler):
 
                 logging.debug('importing a request')
                 xml_string = self.request.get('xml_data')
-                #posts = delicious_tools.posts(xml_string)
-                #myowndelicious_tools.import_posts(user, posts)
-                #message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>\n' for post in posts ]) + '</ol>'
-                message = 'request is %d bytes long' % len(xml_string)
+                posts = delicious_tools.posts(xml_string)
+                myowndelicious_tools.import_posts(user, posts)
+                message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>' for post in posts ]) + '</ol>'
             else:
                 message = f.errors
 

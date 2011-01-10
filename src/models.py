@@ -39,6 +39,7 @@ class Link(db.Model):
         return self.key().name()
 
 
+
 class Post(db.Model):
     """
     Represents a bookmark
@@ -56,14 +57,17 @@ class Post(db.Model):
 
     def add_tag(self, tagname):
         tag = db.Category(tagname)
-        logging.debug('adding tag ' + tag + ' for post ' + self.link.href)
-        t = Tag.get_or_insert(tagname)
-        pt = PostTag.all().filter('post =', self).filter('parent =', t).get()
-        if pt:
-            logging.debug('Post ' + self.key().name() + ' already had tag ' + tagname)
+        if tagname == 'restricted':
+            raise ValueError('"restricted" tag should not be used as an ordinary tag')
         else:
-            pt = PostTag(post = self, tag = t, parent = t)
-            pt.put()
+            logging.debug('adding tag ' + tag + ' for post ' + self.link.href)
+            t = Tag.get_or_insert(tagname)
+            pt = PostTag.all().filter('post =', self).filter('parent =', t).get()
+            if pt:
+                logging.debug('Post ' + self.key().name() + ' already had tag ' + tagname)
+            else:
+                pt = PostTag(post = self, tag = t, parent = t)
+                pt.put()
         return pt
 
 
@@ -86,3 +90,25 @@ class PostTag(db.Model):
     tag = db.ReferenceProperty(Tag)
     
 
+# Entities used for reporting and building homes
+
+# They should be updated by cron-jobs at the end of the day, but may be updated 
+# during the day so we can have some data
+
+
+class TagPopularity(db.Model):
+    """
+    The number of posts that refer to a given tag on a given date 
+    """
+    tagname = db.CharProperty()
+    date = db.DateProperty()
+    number_of_posts = db.IntegerProperty()
+
+
+class LinkPopularity(db.Model):
+    """
+    The number of posts that point to a given URL on a given date
+    """
+    link = db.ReferenceProperty(Link)
+    date = db.DateProperty()
+    number_of_posts = db.IntegerProperty()
