@@ -15,11 +15,15 @@
 # You should have received a copy of the Affero GNU General Public License along 
 # with "My Own Delicious".  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+This library holds helper functions that know about what the application does but 
+are decoupled from the implementation details - the goal is that it should be 
+directly reusabe under Django
+"""
+
 import logging
 
-# We are fine with importing something called models but importing the inhards of GAE would create too strong a coupling
 from models import *
-
 
 def ordinary_tags(taglist):
     """
@@ -64,10 +68,10 @@ def import_a_post(user, post):
         
     return p
 
+
 def import_posts(user, posts):
     """
     This will import posts (provided as a list of dictionaries), add "ordinary" tags and, perhaps, if we decide so, treat "for:" tags independently
     """
     for post in posts:
         import_a_post(user, post)
-

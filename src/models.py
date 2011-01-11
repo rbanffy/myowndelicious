@@ -34,6 +34,7 @@ class Link(db.Model):
     """
     #href = db.LinkProperty()
     # Maybe hash_property and meta belong here. We'll see with enough (more than one post per URL) data
+    # FIXME: cannot use key name as the URL - it's limited to 500 positions
     @property
     def href(self):
         return self.key().name()
@@ -100,7 +101,7 @@ class TagPopularity(db.Model):
     """
     The number of posts that refer to a given tag on a given date 
     """
-    tagname = db.CharProperty()
+    tagname = db.StringProperty()
     date = db.DateProperty()
     number_of_posts = db.IntegerProperty()
 

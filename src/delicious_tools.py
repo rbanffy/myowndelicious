@@ -15,6 +15,12 @@
 # You should have received a copy of the Affero GNU General Public License along 
 # with "My Own Delicious".  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+This library holds helper functions that know about delicious but are decoupled 
+from the application and should be easily reusable in any other program that deals
+with delicious
+"""
+
 import datetime
 import logging
 import sys
