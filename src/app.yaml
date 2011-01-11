@@ -4,6 +4,11 @@ runtime: python
 api_version: 1
 
 handlers:
+
+- url: /worker/.*
+  script: workers.py
+  login: admin
+
 - url: .*
   script: main.py
 

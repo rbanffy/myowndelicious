@@ -37,7 +37,12 @@ def ordinary_tags(taglist):
 def import_a_post(user, post):
     logging.debug('storing post ' + post['link'] + ' from ' + user.nickname() + ' with tags "' + post['tag'] + '"')
     # Get the Link that corresponds to this URL
-    link = Link.get_or_insert(post['link'])
+    link = Link.all().filter('href =', post['link']).get()
+    if link:
+        pass
+    else:
+        link = Link(href = post['link'])
+        link.put()
     # if there already exists a post, get it, if not, create one
     p = Post.all().filter('link =', link).filter('posted_by =', user).get()
     if p:

@@ -71,7 +71,8 @@ class PasteImportHandler(webapp.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
         else:
             f = BookmarksXMLImportForm()
-            template_values = {'form': f}
+            template_values = {'form': f,
+                               'login_logout_line': '%s <a href="%s">logout</a>' % (users.get_current_user(), users.create_logout_url(self.request.uri)) }
             path = os.path.join(os.path.dirname(__file__), 'templates/simple_form.html')
             self.response.out.write(template.render(path, template_values))
 
@@ -115,7 +116,8 @@ class UploadImportHandler(webapp.RequestHandler):
             # pdb.set_trace()
 
             f = BookmarksXMLUploadImportForm()
-            template_values = {'form': f}
+            template_values = {'form': f,
+                               'login_logout_line': '%s <a href="%s">logout</a>' % (users.get_current_user(), users.create_logout_url(self.request.uri)) }
             path = os.path.join(os.path.dirname(__file__), 'templates/simple_form.html')
             self.response.out.write(template.render(path, template_values))
 

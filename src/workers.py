@@ -45,7 +45,7 @@ class ImportHandler(webapp.RequestHandler):
         """
         Useful for testing
         """
-        pass
+        raise NotImplementedError
 
     def post(self):
         logging.debug('importing a request')
@@ -68,3 +68,15 @@ class ImportHandler(webapp.RequestHandler):
             template_values = {'message': message}
             path = os.path.join(os.path.dirname(__file__), 'templates/simple_message.html')
             self.response.out.write(template.render(path, template_values))
+
+
+
+application = webapp.WSGIApplication(
+                                     [('/worker/import_batch', ImportHandler), ],
+                                     debug = True)
+
+def main():
+    run_wsgi_app(application)
+
+if __name__ == "__main__":
+    main()

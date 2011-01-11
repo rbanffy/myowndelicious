@@ -32,12 +32,9 @@ class Link(db.Model):
 
     Maybe we look it up via the hash_property attribute (specially if we decide to turn it into a Long)
     """
-    #href = db.LinkProperty()
     # Maybe hash_property and meta belong here. We'll see with enough (more than one post per URL) data
-    # FIXME: cannot use key name as the URL - it's limited to 500 positions
-    @property
-    def href(self):
-        return self.key().name()
+    href = db.LinkProperty()
+
 
 
 
