@@ -9,7 +9,7 @@ handlers:
   script: workers.py
   login: admin
 
-- url:/tasks/.*
+- url: /tasks/.*
   script: cron.py
   login: admin
 

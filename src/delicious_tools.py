@@ -28,19 +28,25 @@ reload(sys); sys.setdefaultencoding('utf-8')
 
 from xml.dom import minidom # import parse, parseString
 
-def posts(xml_string):
-    """
-    Returns all posts as a series of dictionaries
-    """
-    posts = []
-    for node in minidom.parseString(xml_string).getElementsByTagName('post'):
-        posts.append({'link': node.getAttribute('href'),
-                      'description': node.getAttribute('description'),
-                      'hash': node.getAttribute('hash'), # We can check - this is the MD5 of the URL
-                      'time': datetime.datetime.strptime(node.getAttribute('time'), '%Y-%m-%dT%H:%M:%SZ'),
-                      'extended': node.getAttribute('extended'),
-                      'tag': node.getAttribute('tag'),
-                      'meta': node.getAttribute('meta')
-                      })
-        logging.debug('reading post ' + node.getAttribute('href'))
-    return posts
+
+class DeliciousXML(object):
+
+    def __init__(self, xml_string):
+        self.posts = []
+        doc = minidom.parseString(xml_string)
+
+        self.delicious_login = doc.firstChild.getAttribute('user')
+
+        for node in minidom.parseString(xml_string).getElementsByTagName('post'):
+            self.posts.append({'link': node.getAttribute('href'),
+                          'description': node.getAttribute('description'),
+                          'hash': node.getAttribute('hash'), # We can check - this is the MD5 of the URL
+                          'time': datetime.datetime.strptime(node.getAttribute('time'), '%Y-%m-%dT%H:%M:%SZ'),
+                          'extended': node.getAttribute('extended'),
+                          'tag': node.getAttribute('tag'),
+                          'meta': node.getAttribute('meta')
+                          })
+            logging.debug('reading post ' + node.getAttribute('href'))
+
+
+    

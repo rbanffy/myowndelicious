@@ -21,9 +21,15 @@ from google.appengine.ext import db
 import datetime
 import logging
 
+
 class UserProfile(db.Model):
-    user = db.UserProperty()
+    """
+    Properties associated with a user. The key is the user.user_id
+    """
     delicious_login = db.StringProperty()
+
+    def user_id(self):
+        return self.key().name()
 
 
 class Link(db.Model):
@@ -32,18 +38,17 @@ class Link(db.Model):
 
     Maybe we look it up via the hash_property attribute (specially if we decide to turn it into a Long)
     """
-    href = db.TextProperty() # LinkProperty is limited to 500 chars
-    hash_property = db.StringProperty() # shouldn't call it "hash" or nasty things may happen
+    href = db.TextProperty(required = True) # LinkProperty is limited to 500 chars
+    hash_property = db.StringProperty(required = True) # shouldn't call it "hash" or nasty things may happen
 
 
 class Post(db.Model):
     """
     Represents a bookmark
     """
-    posted_by = db.UserProperty()
+    posted_by = db.UserProperty(required = True)
     link = db.ReferenceProperty(Link)
     description = db.TextProperty()
-    # hash_property = db.StringProperty() # shouldn't call it "hash" or nasty things may happen
     # So far, hash_property seems to be a straighforward MD5 of the URL, but we'll confirm that in due time
     time = db.DateTimeProperty(auto_now_add = True)
     tags = db.ListProperty(str)
@@ -64,6 +69,17 @@ class Post(db.Model):
             else:
                 pt = PostTag(post = self, tag = t, parent = t)
                 pt.put()
+
+            # Treat for:* tags
+            if tagname.startswith('for:'):
+                dm = DeliciousMessage.all().filter('sender =', self.posted_by)\
+                    .filter('recipient_login =', tagname[4:])\
+                    .filter('post =', self).get()
+                if not dm:
+                    DeliciousMessage(sender = self.posted_by,
+                                     recipient_login = tagname[4:],
+                                     post = self).put()
+
         return pt
 
 
@@ -73,7 +89,8 @@ class Tag(db.Model):
 
     Wondering if we can have no property beyond the key name (that's the tag name)
     """
-    tagname = db.CategoryProperty()
+    #tagname = db.CategoryProperty(required = True)
+    pass
 
 
 class PostTag(db.Model):
@@ -82,8 +99,18 @@ class PostTag(db.Model):
 
     A tag is always the parent - keeps the tag relationships close in the datastore
     """
-    post = db.ReferenceProperty(Post)
-    tag = db.ReferenceProperty(Tag)
+    post = db.ReferenceProperty(Post, required = True)
+    tag = db.ReferenceProperty(Tag, required = True)
+
+
+class DeliciousMessage(db.Model):
+    """
+    Represents the bookmarks with "for:*" tags
+    """
+    sender = db.UserProperty(required = True)
+    recipient_login = db.StringProperty(required = True)
+    post = db.ReferenceProperty(Post, required = True)
+    seen = db.BooleanProperty(default = True)
     
 
 # Entities used for reporting and building homes
@@ -98,9 +125,9 @@ class TagPopularity(db.Model):
 
     Used for "popular tags" boxes
     """
-    tagname = db.StringProperty()
-    date = db.DateProperty()
-    number_of_posts = db.IntegerProperty()
+    tag = db.ReferenceProperty(Tag, required = True)
+    date = db.DateProperty(required = True)
+    number_of_posts = db.IntegerProperty(required = True, default = 0)
 
 
 class LinkPopularity(db.Model):
@@ -109,9 +136,9 @@ class LinkPopularity(db.Model):
 
     Used for "popular links" boxes
     """
-    link = db.ReferenceProperty(Link)
-    date = db.DateProperty()
-    number_of_posts = db.IntegerProperty()
+    link = db.ReferenceProperty(Link, required = True)
+    date = db.DateProperty(required = True)
+    number_of_posts = db.IntegerProperty(required = True, default = 0)
 
 
 class UserActivity(db.Model):
@@ -120,3 +147,7 @@ class UserActivity(db.Model):
     
     Used for "most active" boxes
     """
+    user = db.UserProperty(required = True)
+    date = db.DateProperty(required = True)
+    number_of_posts = db.IntegerProperty(required = True, default = 0)   
+    

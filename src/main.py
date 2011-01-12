@@ -34,8 +34,11 @@ import logging
 import itertools 
 
 from forms import *
+from models import *
+
 import delicious_tools 
 import myowndelicious_tools
+
 
 
 def batches(iterable, batch_size):
@@ -139,9 +142,18 @@ class UploadImportHandler(webapp.RequestHandler):
 
                 logging.debug('importing a request')
                 xml_string = self.request.get('xml_data')
-                posts = delicious_tools.posts(xml_string)
+                xml = delicious_tools.DeliciousXML(xml_string)
 
-                for batch in batches(posts, 50):
+                # Update the delicious_login property of the user profile
+                up = UserProfile.get_or_insert(user.user_id())
+                if up.delicious_login != None and up.delicious_login != xml.delicious_login:
+                    # We have to decide what we do here
+                    raise ValueError('delicious_login already set and different from file being imported')
+                else:
+                    up.delicious_login = xml.delicious_login
+                    up.put()
+
+                for batch in batches(xml.posts, 50):
                     logging.debug('importing a batch of posts')
                     # TODO: It would be nice to dispatch one worker per batch here
                     myowndelicious_tools.import_posts(user, batch)

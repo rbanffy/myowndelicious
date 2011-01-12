@@ -61,7 +61,6 @@ def import_a_post(user, post):
         p = Post(posted_by = user,
                  link = link,
                  description = post['description'],
-                 hash_property = post['hash'],
                  tags = ordinary_tags(post['tag'].split(' ')),
                  extended = post['extended'],
                  meta = post['meta'],
