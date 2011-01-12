@@ -32,10 +32,8 @@ class Link(db.Model):
 
     Maybe we look it up via the hash_property attribute (specially if we decide to turn it into a Long)
     """
-    # Maybe hash_property and meta belong here. We'll see with enough (more than one post per URL) data
-    href = db.LinkProperty()
-
-
+    href = db.TextProperty() # LinkProperty is limited to 500 chars
+    hash_property = db.StringProperty() # shouldn't call it "hash" or nasty things may happen
 
 
 class Post(db.Model):
@@ -45,7 +43,7 @@ class Post(db.Model):
     posted_by = db.UserProperty()
     link = db.ReferenceProperty(Link)
     description = db.TextProperty()
-    hash_property = db.StringProperty() # shouldn't call it "hash" or nasty things may happen
+    # hash_property = db.StringProperty() # shouldn't call it "hash" or nasty things may happen
     # So far, hash_property seems to be a straighforward MD5 of the URL, but we'll confirm that in due time
     time = db.DateTimeProperty(auto_now_add = True)
     tags = db.ListProperty(str)
@@ -97,6 +95,8 @@ class PostTag(db.Model):
 class TagPopularity(db.Model):
     """
     The number of posts that refer to a given tag on a given date 
+
+    Used for "popular tags" boxes
     """
     tagname = db.StringProperty()
     date = db.DateProperty()
@@ -106,7 +106,17 @@ class TagPopularity(db.Model):
 class LinkPopularity(db.Model):
     """
     The number of posts that point to a given URL on a given date
+
+    Used for "popular links" boxes
     """
     link = db.ReferenceProperty(Link)
     date = db.DateProperty()
     number_of_posts = db.IntegerProperty()
+
+
+class UserActivity(db.Model):
+    """
+    The number of posts for a given user on a given date
+    
+    Used for "most active" boxes
+    """

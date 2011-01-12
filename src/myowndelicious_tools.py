@@ -22,6 +22,7 @@ directly reusabe under Django
 """
 
 import logging
+from md5 import md5
 
 from models import *
 
@@ -37,11 +38,11 @@ def ordinary_tags(taglist):
 def import_a_post(user, post):
     logging.debug('storing post ' + post['link'] + ' from ' + user.nickname() + ' with tags "' + post['tag'] + '"')
     # Get the Link that corresponds to this URL
-    link = Link.all().filter('href =', post['link']).get()
+    link = Link.all().filter('hash_property =', post['hash']).get()
     if link:
         pass
     else:
-        link = Link(href = post['link'])
+        link = Link(href = post['link'], hash_property = post['hash'])
         link.put()
     # if there already exists a post, get it, if not, create one
     p = Post.all().filter('link =', link).filter('posted_by =', user).get()
