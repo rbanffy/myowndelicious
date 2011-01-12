@@ -1,0 +1,9 @@
+cron:
+- description: update popular tags
+  url: /tasks/update_popular_tags
+  schedule: every 60 minutes
+
+- description: update popular links
+  url: /tasks/update_popular_links
+  schedule: every 60 minutes
+

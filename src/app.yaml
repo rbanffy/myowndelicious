@@ -9,6 +9,10 @@ handlers:
   script: workers.py
   login: admin
 
+- url:/tasks/.*
+  script: cron.py
+  login: admin
+
 - url: .*
   script: main.py
 
