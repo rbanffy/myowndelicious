@@ -31,6 +31,14 @@ class UserProfile(db.Model):
     def user_id(self):
         return self.key().name()
 
+    def collect_mail():
+        """
+        Collects all posts with a for: tag for this user's delicious_login
+        """
+        tag = Tag.get_or_insert('for:' + self.delicious_login)
+        [pt.post for pt in PostTag.all().filter('tag =', tag)]
+            
+        
 
 class Link(db.Model):
     """
@@ -40,6 +48,13 @@ class Link(db.Model):
     """
     href = db.TextProperty(required = True) # LinkProperty is limited to 500 chars
     hash_property = db.StringProperty(required = True) # shouldn't call it "hash" or nasty things may happen
+
+    @classmethod
+    def most_popular(cls, how_many = 10):
+        """
+        FIXME: This is a dummy class method
+        """
+        return Link.all()[:how_many]
 
 
 class Post(db.Model):
@@ -57,7 +72,9 @@ class Post(db.Model):
     restricted = db.BooleanProperty(default = False) # The special-meaning "restricted" tag lives here
 
     def add_tag(self, tagname):
-        tag = db.Category(tagname)
+        """
+        Add a tag named "tagname" to this post
+        """
         if tagname == 'restricted':
             raise ValueError('"restricted" tag should not be used as an ordinary tag')
         else:
@@ -72,14 +89,21 @@ class Post(db.Model):
 
             # Treat for:* tags
             if tagname.startswith('for:'):
-                dm = DeliciousMessage.all().filter('sender =', self.posted_by)\
-                    .filter('recipient_login =', tagname[4:])\
-                    .filter('post =', self).get()
-                if not dm:
-                    DeliciousMessage(sender = self.posted_by,
-                                     recipient_login = tagname[4:],
-                                     post = self).put()
-
+                recipient_login = tagname[4:]
+                recipient = UserProfile.all().filter('delicious_login =', recipient_login).get()
+                if recipient:
+                    # We only add the message if the recipient already exists
+                    logging.debug('adding link %s to %s' % (self.description, recipient_login))
+                    dm = DeliciousMessage.all().filter('sender =', self.posted_by)\
+                        .filter('recipient =', recipient_login)\
+                        .filter('post =', self).get()
+                    if not dm:
+                        DeliciousMessage(sender = self.posted_by,
+                                         recipient_login = tagname[4:],
+                                         post = self,
+                                         dated = self.time).put()
+                else:
+                    logging.debug('recipient %s does not currently exist in the datastore' % recipient_login)
         return pt
 
 
@@ -91,6 +115,13 @@ class Tag(db.Model):
     """
     #tagname = db.CategoryProperty(required = True)
     pass
+
+    @classmethod
+    def most_popular(cls, how_many = 10):
+        """
+        FIXME: This is a dummy class method
+        """
+        return Tag.all()[:how_many]
 
 
 class PostTag(db.Model):
@@ -107,11 +138,19 @@ class DeliciousMessage(db.Model):
     """
     Represents the bookmarks with "for:*" tags
     """
-    sender = db.UserProperty(required = True)
-    recipient_login = db.StringProperty(required = True)
+    sender = db.ReferenceProperty(UserProfile, collection_name = 'posts_sent', required = True)
+    recipient = db.ReferenceProperty(UserProfile, collection_name = 'posts_received', required = True)
     post = db.ReferenceProperty(Post, required = True)
     seen = db.BooleanProperty(default = True)
+    dated = db.DateTimeProperty(required = True)
     
+    @classmethod
+    def incoming(cls, recipient, how_many = 10):
+        """
+        Returns all incoming messages of a given user
+        """
+        return DeliciousMessage.all().filter('recipient =', recipient)
+
 
 # Entities used for reporting and building homes
 

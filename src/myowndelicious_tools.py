@@ -44,18 +44,15 @@ def import_a_post(user, post):
     else:
         link = Link(href = post['link'], hash_property = post['hash'])
         link.put()
+
     # if there already exists a post, get it, if not, create one
     p = Post.all().filter('link =', link).filter('posted_by =', user).get()
     if p:
         # Already a post for this link and this user
+
         # We have to remove all PostTags that have no corresponding tags in this post - we are reimporting a post
-
-        tags_to_delete = [ pt.tag.key().name() for pt in PostTag.all().filter('post =', p) 
-                           if pt.tag.key().name() not in p.tags ]
-
-        for tagname in tags_to_delete:
-            logging.debug('should get rid of PostTag for post %s and tag %s' % (pt.tag.key().name(), pt.post.link.href))
- 
+        [ pt.delete() for pt in PostTag.all().filter('post =', p) if pt.tag.key().name() not in p.tags ]
+       
     else:
         # We'll make a new post and add required Tag and PostTag objects
         p = Post(posted_by = user,

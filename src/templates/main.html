@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 
 {% block contents %}
+
+{% if incoming %}<div id="inbox">
+  <ul id="">
+    {% for message in incoming %}
+    <li>{{ message. }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div id="posts">
+  <ul id="">
+    {% for posts in posts %}
+    <li>{{ post.title }}</li>
+    {% endfor %}
+  </ul>
+</div>
+
+
 <p>"Please login" or, if logged in, your n most recent bookmarks, along with your tags.</p>
 {% endblock %}
 

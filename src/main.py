@@ -54,7 +54,23 @@ def batches(iterable, batch_size):
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
-        template_values = {}
+        user = users.get_current_user()
+        if user:
+            login_logout_line = '%s <a href="%s">logout</a>' % (users.get_current_user(), users.create_logout_url(self.request.uri))
+        else:
+            login_logout_line = '<a href="%s">login</a>' % users.create_login_url(self.request.uri)
+
+        template_values = {'user': user,
+                           'login_logout_line': login_logout_line}
+
+        if user:
+            up = UserProfile.get_by_key_name(user.user_id())
+            template_values['incoming'] = DeliciousMessage.incoming(recipient = up)
+            template_values['links'] = Link.most_popular(10)
+        else:
+            template_values['links'] = Link.most_popular(10)
+
+
         path = os.path.join(os.path.dirname(__file__), 'templates/main.html')
         self.response.out.write(template.render(path, template_values))
 
@@ -152,6 +168,7 @@ class UploadImportHandler(webapp.RequestHandler):
                 else:
                     up.delicious_login = xml.delicious_login
                     up.put()
+                    up.collect_mail()
 
                 for batch in batches(xml.posts, 50):
                     logging.debug('importing a batch of posts')
