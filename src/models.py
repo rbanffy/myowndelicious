@@ -31,7 +31,7 @@ class UserProfile(db.Model):
     def user_id(self):
         return self.key().name()
 
-    def collect_mail():
+    def collect_mail(self):
         """
         Collects all posts with a for: tag for this user's delicious_login
         """
@@ -78,7 +78,7 @@ class Post(db.Model):
         if tagname == 'restricted':
             raise ValueError('"restricted" tag should not be used as an ordinary tag')
         else:
-            logging.debug('adding tag ' + tag + ' for post ' + self.link.href)
+            logging.debug('adding tag ' + tagname + ' for post ' + self.link.href)
             t = Tag.get_or_insert(tagname)
             pt = PostTag.all().filter('post =', self).filter('parent =', t).get()
             if pt:
