@@ -170,7 +170,9 @@ class UploadImportHandler(webapp.RequestHandler):
                     up.put()
                     up.collect_mail()
 
-                for batch in batches(xml.posts, 50):
+                posts = xml.posts
+
+                for batch in batches(posts, 50):
                     logging.debug('importing a batch of posts')
                     # TODO: It would be nice to dispatch one worker per batch here
                     myowndelicious_tools.import_posts(user, batch)
