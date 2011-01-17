@@ -66,9 +66,9 @@ class MainHandler(webapp.RequestHandler):
         if user:
             up = UserProfile.get_by_key_name(user.user_id())
             template_values['incoming'] = DeliciousMessage.incoming(recipient = up)
-            template_values['links'] = Link.most_popular(10)
+            template_values['posts'] = Post.all().filter('posted_by =', user).order('-time').fetch(10)
         else:
-            template_values['links'] = Link.most_popular(10)
+            template_values['posts'] = (post for post in Post.all().filter('link in', Link.most_popular(10)))
 
 
         path = os.path.join(os.path.dirname(__file__), 'templates/main.html')

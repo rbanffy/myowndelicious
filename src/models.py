@@ -48,6 +48,9 @@ class Link(db.Model):
     """
     href = db.TextProperty(required = True) # LinkProperty is limited to 500 chars
     hash_property = db.StringProperty(required = True) # shouldn't call it "hash" or nasty things may happen
+    description = db.TextProperty() # To be filled (cannot trust whatever was imported)
+    to_be_filled = db.BooleanProperty(default = False) # Set to True when auto-description gets generated
+
 
     @classmethod
     def most_popular(cls, how_many = 10):

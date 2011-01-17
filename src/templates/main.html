@@ -13,13 +13,11 @@
 
 <div id="posts">
   <ul id="">
-    {% for posts in posts %}
-    <li>{{ post.title }}</li>
+    {% for post in posts %}
+    <li>{{ post.description }}</li>
     {% endfor %}
   </ul>
 </div>
 
-
-<p>"Please login" or, if logged in, your n most recent bookmarks, along with your tags.</p>
 {% endblock %}
 
