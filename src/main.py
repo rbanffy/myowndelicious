@@ -101,12 +101,43 @@ class PasteImportHandler(webapp.RequestHandler):
         if not user:
             self.redirect(users.create_login_url(self.request.uri))
         else:
-            f = BookmarksXMLImportForm(self.request)
+            f = BookmarksXMLUploadImportForm(self.request)
             if f.is_valid():
+
+                # import sys
+                # for attr in ('stdin', 'stdout', 'stderr'):
+                #     setattr(sys, attr, getattr(sys, '__%s__' % attr))
+                # import pdb
+                # pdb.set_trace()
+
                 logging.debug('importing a request')
-                xml_string = f.clean_data['xml_field']
-                posts = delicious_tools.posts(xml_string)
-                myowndelicious_tools.import_posts(user, posts)
+                xml_string = self.request.get('xml_data')
+                xml = delicious_tools.DeliciousXML(xml_string)
+
+                # Update the delicious_login property of the user profile
+                up = UserProfile.get_or_insert(user.user_id())
+                if up.delicious_login != None and up.delicious_login != xml.delicious_login:
+                    # We have to decide what we do here
+                    raise ValueError('delicious_login already set and different from file being imported')
+                else:
+                    up.delicious_login = xml.delicious_login
+                    up.put()
+                    up.collect_mail()
+
+                posts = xml.posts
+
+                for batch in batches(posts, 50):
+                    logging.debug('importing a batch of posts')
+                    myowndelicious_tools.import_posts(user, batch)
+                    # TODO: It would be nice to dispatch one worker per batch here
+                    # for post in posts:
+                    #     taskqueue.Task(url='/worker/import_single', 
+                    #                    method = 'POST',
+                    #                    params={'user': account.username,
+                    #                            'service': 'twitter'}).add('stats')
+
+
+
                 message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>' for post in posts ]) + '</ol>'
             else:
                 message = f.errors
@@ -114,6 +145,8 @@ class PasteImportHandler(webapp.RequestHandler):
             template_values = {'message': message}
             path = os.path.join(os.path.dirname(__file__), 'templates/simple_message.html')
             self.response.out.write(template.render(path, template_values))
+
+
 
 
 class UploadImportHandler(webapp.RequestHandler):
@@ -174,8 +207,15 @@ class UploadImportHandler(webapp.RequestHandler):
 
                 for batch in batches(posts, 50):
                     logging.debug('importing a batch of posts')
-                    # TODO: It would be nice to dispatch one worker per batch here
                     myowndelicious_tools.import_posts(user, batch)
+                    # TODO: It would be nice to dispatch one worker per batch here
+                    # for post in posts:
+                    #     taskqueue.Task(url='/worker/import_single', 
+                    #                    method = 'POST',
+                    #                    params={'user': account.username,
+                    #                            'service': 'twitter'}).add('stats')
+
+
 
                 message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>' for post in posts ]) + '</ol>'
             else:
@@ -184,8 +224,6 @@ class UploadImportHandler(webapp.RequestHandler):
             template_values = {'message': message}
             path = os.path.join(os.path.dirname(__file__), 'templates/simple_message.html')
             self.response.out.write(template.render(path, template_values))
-
-
 
 
 def main():

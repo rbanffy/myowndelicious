@@ -36,6 +36,12 @@ def ordinary_tags(taglist):
 
 
 def import_a_post(user, post):
+    """
+    Imports one post
+
+    user is a User object
+    post is a dictionary
+    """
     logging.debug('storing post ' + post['link'] + ' from ' + user.nickname() + ' with tags "' + post['tag'] + '"')
     # Get the Link that corresponds to this URL
     link = Link.all().filter('hash_property =', post['hash']).get()

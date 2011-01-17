@@ -19,6 +19,7 @@ from google.appengine.api import oauth
 from google.appengine.api import urlfetch
 from google.appengine.api import users 
 from google.appengine.api import xmpp
+from google.appengine.api.labs import taskqueue
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import util
@@ -31,12 +32,14 @@ import os
 import random
 import logging
 
+
+
 from forms import *
 import delicious_tools 
 import myowndelicious_tools
 
 
-class ImportHandler(webapp.RequestHandler):
+class SingleImportHandler(webapp.RequestHandler):
     """
     Asynchronously imports a given XML for a given user
     """
@@ -48,31 +51,27 @@ class ImportHandler(webapp.RequestHandler):
         raise NotImplementedError
 
     def post(self):
-        logging.debug('importing a request')
+        """
+        Imports a single post
 
-        user = users.get_current_user()
+        username is the user's login
+        post is the post in JSON format
+        """
+        logging.debug('importing a request in a worker')
 
-        if not user:
-            self.redirect(users.create_login_url(self.request.uri))
-        else:
-            # f = BookmarksXMLImportForm(self.request)
-            # We cannot validate this form in the dev_appserver - f.is_valid() just hangs
-            logging.debug('got the form')
-            # We also cannot use the form data, so we must go directly to the request data
-            xml_string = self.request.POST['xml_field']
-            logging.debug('our xml has %d' % len(xml_string))
-            posts = delicious_tools.posts(xml_string)
-            myowndelicious_tools.import_posts(user, posts)
-            message = '<ol>' + '\n'.join([ '<li>' + post['link'] + '</li>\n' for post in posts ]) + '</ol>'
+        # import sys
+        # for attr in ('stdin', 'stdout', 'stderr'):
+        #     setattr(sys, attr, getattr(sys, '__%s__' % attr))
+        # import pdb
+        # pdb.set_trace()
 
-            template_values = {'message': message}
-            path = os.path.join(os.path.dirname(__file__), 'templates/simple_message.html')
-            self.response.out.write(template.render(path, template_values))
-
+        user = self.request.POST.get('username')
+        post = self.request.POST.get('post')
+        myowndelicious_tools.import_single(user, post)
 
 
 application = webapp.WSGIApplication(
-                                     [('/worker/import_batch', ImportHandler), ],
+                                     [('/worker/import_single', SingleImportHandler), ],
                                      debug = True)
 
 def main():
