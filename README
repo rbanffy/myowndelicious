@@ -2,11 +2,12 @@ My Very Own Delicious Clone
 ===========================
 
 This is an unambitious attempt at preserving user bookmarks from delicious 
-servers before Yahoo shuts down the system. It should run on top of Google's 
-App Engine (I know - it may also be shut down in the future) and should be 
-able to import Delicious bookmarks (even grab them itself, if the user gives
-this app their password - and that's one reason why this application is
-open-source: the user must be able to deploy it on his own GAE instance).
+servers before Yahoo shuts down the system (we now know those rumours were 
+greatly exaggerated). It should run on top of Google's App Engine (I know - 
+it may also be shut down in the future) and should be able to import 
+Delicious bookmarks (even grab them itself, if the user gives this app their
+password - and that's one reason why this application is open-source: the 
+user must be able to deploy it on his own GAE instance).
 
 It's licensed under the Affero flavor of GPL to ensure no lock-in from any
 entity that decides to use it to build a social bookmarking system.
